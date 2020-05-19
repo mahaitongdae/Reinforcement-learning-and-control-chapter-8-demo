@@ -1,16 +1,14 @@
-import Dynamic_Model
+import Dynamics
 import numpy as np
 import torch
-from matplotlib import pyplot as plt
-from agent import Actor, Critic
-from Config import Dynamics_Config
 import time
 import os
-from utils import myplot, smooth
+from Network import Actor, Critic
+from Config import DynamicsConfig
+from utils import myplot
 S_DIM = 4
 A_DIM = 1
-POLY_DEGREE = 2
-LR_P = 1e-2
+
 
 def plot_comparison(picture_dir):
     '''
@@ -23,7 +21,7 @@ def plot_comparison(picture_dir):
         location of figure saved.
 
     '''
-    config = Dynamics_Config()
+    config = DynamicsConfig()
     comparison_dir = "Results_dir/Comparison_Data"
     if os.path.exists(os.path.join(comparison_dir, 'MPC_state.txt')) == 0 or \
         os.path.exists(os.path.join(comparison_dir, 'Open_loop_state.txt')) == 0:
@@ -158,11 +156,11 @@ def adp_simulation_plot(log_dir):
     '''
     policy = Actor(S_DIM, A_DIM)
     value = Critic(S_DIM, A_DIM)
-    config = Dynamics_Config()
+    config = DynamicsConfig()
     load_dir = log_dir
     policy.load_parameters(load_dir)
     value.load_parameters(load_dir)
-    statemodel_plt = Dynamic_Model.StateModel()
+    statemodel_plt = Dynamics.VehicleDynamics()
     state = torch.tensor([[0.0, 0.0, config.psi_init, 0.0, 0.0]])
     state.requires_grad_(False)
     x_ref = statemodel_plt.reference_trajectory(state[:, -1])

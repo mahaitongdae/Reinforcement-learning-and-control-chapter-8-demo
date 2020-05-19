@@ -1,11 +1,9 @@
-import Dynamic_Model
 import numpy as np
 import torch
-from matplotlib import pyplot as plt
-from agent import Actor, Critic
-from datetime import datetime
 import os
+from matplotlib import pyplot as plt
 from Config import GeneralConfig
+
 
 class Train(GeneralConfig):
     def __init__(self):
@@ -28,11 +26,16 @@ class Train(GeneralConfig):
         for i in range(self.FORWARD_STEP+1):
             self.x_forward.append([])
 
-        # for i in range(self.BATCH_SIZE):
-        #     self.buffer = np.zeros([self.BUFFER_SIZE, self.DYNAMICS_DIM])
-        #     self.buffer_all.append(self.buffer)
-
     def update_state(self, policy, dynamics):
+        """
+        Update state using policy net and dynamics model.
+        Parameters
+        ----------
+        policy: nn.Module
+            policy net.
+        dynamics: object dynamics.
+
+        """
         self.agent_batch = dynamics.check_done(self.agent_batch)
         self.agent_batch.detach_()
         ref_trajectory = dynamics.reference_trajectory(self.agent_batch[:, -1])
@@ -42,8 +45,16 @@ class Train(GeneralConfig):
             dynamics.step(self.agent_batch, self.control)
         self.agent_batch = self.agent_batch_next.detach()
 
-    def update_value(self, policy, value, dynamics):
+    def policy_evaluation(self, policy, value, dynamics):
+        """
+        Do n-step look-ahead policy evaluation.
+        Parameters
+        ----------
+        policy: policy net
+        value: value net
+        dynamics: object dynamics
 
+        """
         for i in range(self.FORWARD_STEP):
             if i == 0:
                 self.x_forward[i] = self.agent_batch.detach()
@@ -71,7 +82,15 @@ class Train(GeneralConfig):
         self.value_loss = np.append(self.value_loss, value_loss.detach().numpy())
         return value_loss.detach().numpy()
 
-    def update_policy(self, policy, value):
+    def policy_improvement(self, policy, value):
+        """
+        Do n-step look-ahead policy improvement.
+        Parameters
+        ----------
+        policy: policy net
+        value: value net
+
+        """
         self.value_next = value.forward(self.state_batch_next)
         policy_loss = torch.mean(self.sum_utility + self.value_next)  # Hamilton
         policy.zero_grad()
@@ -81,10 +100,34 @@ class Train(GeneralConfig):
         return policy_loss.detach().numpy()
 
     def save_data(self, log_dir):
+        """
+        Save loss data.
+        Parameters
+        ----------
+        log_dir: str
+            directory in ./Results_dir.
+
+        Returns
+        -------
+
+        """
         np.savetxt(os.path.join(log_dir, "value_loss.txt"), self.value_loss)
         np.savetxt(os.path.join(log_dir, "policy_loss.txt"), self.policy_loss)
 
     def print_loss_figure(self, iteration, log_dir):
+        """
+        print figure of loss decent.
+        Parameters
+        ----------
+        iteration: int
+            number of iterations.
+        log_dir: str
+            directory in ./Results_dir.
+
+        Returns
+        -------
+
+        """
         plt.figure()
         plt.scatter(range(iteration), np.log10(self.value_loss), c='r', marker=".", s=5., label="policy evaluation")
         plt.scatter(range(iteration), np.log10(self.policy_loss), c='b', marker=".", s=5., label="policy improvement")

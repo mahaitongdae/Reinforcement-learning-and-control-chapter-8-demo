@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+
 class GeneralConfig(object):
     BATCH_SIZE = 256
     DYNAMICS_DIM = 5
@@ -13,7 +14,7 @@ class GeneralConfig(object):
     NP_TOTAL = 500
 
 
-class Dynamics_Config(GeneralConfig):
+class DynamicsConfig(GeneralConfig):
     a = 1.14       # distance c.g.to front axle(m)
     L = 2.54       # wheel base(m)
     b = L - a      # distance c.g.to rear axle(m)
