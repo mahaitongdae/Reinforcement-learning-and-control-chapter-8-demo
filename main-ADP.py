@@ -20,13 +20,13 @@ from plot_figure import adp_simulation_plot, plot_comparison
 
 
 # Parameters
-MAX_ITERATION = 5000        # max iterations
+MAX_ITERATION = 100         # max iterations
 LR_P = 1e-4                 # learning rate of policy net
 LR_V = 3e-4                 # learning rate of value net
 S_DIM = 4                   # state dimension
 A_DIM = 1                   # action dimension
 TRAIN_FLAG = 1
-LOAD_PARA_FLAG = 1
+LOAD_PARA_FLAG = 0
 
 # Set random seed
 np.random.seed(0)
@@ -58,7 +58,7 @@ if TRAIN_FLAG == 1:
         iteration_index += 1
 
         # print train information
-        if iteration_index % 100 == 0:
+        if iteration_index % 50 == 0:
             log_trace = "iteration:{:3d} |"\
                         "policy_loss:{:3.3f} |" \
                         "value_loss:{:3.3f}".format(iteration_index, float(policy_loss), float(value_loss))
@@ -74,7 +74,7 @@ if TRAIN_FLAG == 1:
             train.print_loss_figure(MAX_ITERATION, log_dir)
             train.save_data(log_dir)
             adp_simulation_plot(log_dir)
-            plot_comparison("./Figures")
+            # plot_comparison("./Figures")
             break
 
 
