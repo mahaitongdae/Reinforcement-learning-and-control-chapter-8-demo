@@ -20,13 +20,13 @@ from plot_figure import adp_simulation_plot, plot_comparison
 
 
 # Parameters
-MAX_ITERATION = 100         # max iterations
-LR_P = 1e-4                 # learning rate of policy net
-LR_V = 3e-4                 # learning rate of value net
+MAX_ITERATION = 500         # max iterations
+LR_P = 8e-4                 # learning rate of policy net
+LR_V = 1e-3                 # learning rate of value net
 S_DIM = 4                   # state dimension
 A_DIM = 1                   # action dimension
 TRAIN_FLAG = 1
-LOAD_PARA_FLAG = 0
+LOAD_PARA_FLAG = 1
 
 # Set random seed
 np.random.seed(0)
@@ -43,7 +43,7 @@ iteration_index = 0
 
 if LOAD_PARA_FLAG == 1:
     # load pre-trained parameters
-    load_dir = "./Results_dir/2020-05-18-02-21-10000"
+    load_dir = "./Results_dir/2020-05-20-14-06-500"
     policy.load_parameters(load_dir)
     value.load_parameters(load_dir)
 
@@ -58,7 +58,7 @@ if TRAIN_FLAG == 1:
         iteration_index += 1
 
         # print train information
-        if iteration_index % 50 == 0:
+        if iteration_index % 1 == 0:
             log_trace = "iteration:{:3d} |"\
                         "policy_loss:{:3.3f} |" \
                         "value_loss:{:3.3f}".format(iteration_index, float(policy_loss), float(value_loss))

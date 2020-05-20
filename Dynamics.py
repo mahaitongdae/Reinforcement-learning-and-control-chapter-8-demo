@@ -178,7 +178,8 @@ class VehicleDynamics(DynamicsConfig):
         F_y2 = self.k2 * alpha_2
 
         # derivative of state
-        deri_y = self.u * psi + u_lateral
+        # deri_y = self.u * psi + u_lateral
+        deri_y = self.u * torch.sin(psi) + u_lateral * torch.cos(psi)
         deri_u_lat = (torch.mul(F_y1, torch.cos(delta)) + F_y2) / (self.m) - self.u * omega_r
         deri_psi = omega_r
         deri_omega_r = (torch.mul(self.a * F_y1, torch.cos(delta)) - self.b * F_y2) / self.I_zz
@@ -220,7 +221,7 @@ class VehicleDynamics(DynamicsConfig):
         utility: tensor   shape: [BATCH_SIZE, ]
             utility, i.e. l(x,u)
         """
-        utility = 0.01 * (10 * torch.pow(state[:, 0], 2) + 10 * torch.pow(state[:, 2], 2) + 0.1 * torch.pow(control[:, 0], 2))
+        utility = 0.01 * (10 * torch.pow(state[:, 0], 2) + 10 * torch.pow(state[:, 2], 2) + 10 * torch.pow(control[:, 0], 2))
         return utility
 
     def step(self, state, control):
@@ -251,7 +252,10 @@ class VehicleDynamics(DynamicsConfig):
             rear wheel slip angle
 
         """
-        deri_state, F_y1, F_y2, alpha_1, alpha_2 = self._state_function(state, control)
+        if self.nonlinearity:
+            deri_state, F_y1, F_y2, alpha_1, alpha_2 = self._state_function(state, control)
+        else:
+            deri_state, F_y1, F_y2, alpha_1, alpha_2 = self._state_function_linear(state, control)
         state_next = state + self.Ts * deri_state
         utility = self._utility(state, control)
         f_xu = deri_state[:, 0:4]

@@ -7,7 +7,7 @@ class GeneralConfig(object):
     STATE_DIM = 4
     ACTION_DIM = 1
     BUFFER_SIZE = 5000
-    FORWARD_STEP = 30
+    FORWARD_STEP = 20
     GAMMA_D = 1
 
     NP = 50
@@ -15,6 +15,9 @@ class GeneralConfig(object):
 
 
 class DynamicsConfig(GeneralConfig):
+
+    nonlinearity = True
+
     a = 1.14       # distance c.g.to front axle(m)
     L = 2.54       # wheel base(m)
     b = L - a      # distance c.g.to rear axle(m)
@@ -34,13 +37,13 @@ class DynamicsConfig(GeneralConfig):
     F_z1 = m * g * b / L    # Vertical force on front axle
     F_z2 = m * g * a / L    # Vertical force on rear axle
 
-    k_curve = 1/30          # curve shape of a * sin(kx)
-    a_curve = 1             # curve shape of a * sin(kx)
+    k_curve = 1/10          # curve shape of a * sin(kx)
+    a_curve = 1           # curve shape of a * sin(kx)
     psi_init = a_curve * k_curve # initial position of psi
 
     # ADP reset state range
     y_range = 5
-    psi_range = 1.7
+    psi_range = 1.3
     beta_range = 1.0
 
 
