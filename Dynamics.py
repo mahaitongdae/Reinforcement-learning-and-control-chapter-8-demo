@@ -28,7 +28,7 @@ class VehicleDynamics(DynamicsConfig):
         self.init_state[:, 1] = torch.normal(0.0, 0.4, [self.BATCH_SIZE,])
         self.init_state[:, 2] = torch.normal(0.0, 0.15, [self.BATCH_SIZE,])
         self.init_state[:, 3] = torch.normal(0.0, 0.1, [self.BATCH_SIZE,])
-        self.init_state[:, 4] = torch.linspace(0.0, np.pi, self.BATCH_SIZE)
+        self.init_state[:, 4] = torch.linspace(0.0, 1.5 * np.pi / self.k_curve, self.BATCH_SIZE)
         init_ref = self.reference_trajectory(self.init_state[:, 4])
         init_ref_all = torch.cat((init_ref, torch.zeros([self.BATCH_SIZE,1])),1)
         self._state = self.init_state
@@ -46,10 +46,10 @@ class VehicleDynamics(DynamicsConfig):
         -------
 
         """
-        threshold = np.kron(np.ones([self.BATCH_SIZE, 1]), np.array([self.y_range, self.psi_range]))
+        threshold = np.kron(np.ones([self.BATCH_SIZE, 1]), np.array([self.y_range, self.psi_range, self.x_range]))
         threshold = np.array(threshold, dtype='float32')
         threshold = torch.from_numpy(threshold)
-        check_state = state[:, [0, 2]].clone()
+        check_state = state[:, [0, 2, 4]].clone()
         check_state.detach_()
         sign_error = torch.sign(torch.abs(check_state) - threshold) # if abs state is over threshold, sign_error = 1
         self._reset_index, _ = torch.max(sign_error, 1) # if one state is over threshold, _reset_index = 1
@@ -223,6 +223,13 @@ class VehicleDynamics(DynamicsConfig):
         utility = 0.01 * (10 * torch.pow(state[:, 0], 2) + 10 * torch.pow(state[:, 2], 2) + 0.1 * torch.pow(control[:, 0], 2))
         return utility
 
+    def _utility_full(self, state, control):
+        utility = 0.01 * (
+                    10 * torch.pow(state[:, 0] - self.a_curve * torch.sin(self.k_curve * state[:,4]), 2)
+                    + 10 * torch.pow(state[:, 2] - torch.atan(self.a_curve* self.k_curve * torch.cos(self.k_curve* state[:,4])), 2)
+                    + 0.1 * torch.pow(control[:, 0], 2))
+        return utility
+
     def step(self, state, control):
         """
         step ahead with discrete state function, i.e. x'=f(x,u)
@@ -251,9 +258,9 @@ class VehicleDynamics(DynamicsConfig):
             rear wheel slip angle
 
         """
-        deri_state, F_y1, F_y2, alpha_1, alpha_2 = self._state_function(state, control)
+        deri_state, F_y1, F_y2, alpha_1, alpha_2 = self._state_function_linear(state, control)
         state_next = state + self.Ts * deri_state
-        utility = self._utility(state, control)
+        utility = self._utility_full(state, control) # todo:fully
         f_xu = deri_state[:, 0:4]
         return state_next, f_xu, utility, F_y1, F_y2, alpha_1, alpha_2
 

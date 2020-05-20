@@ -39,7 +39,8 @@ class Train(GeneralConfig):
         self.agent_batch = dynamics.check_done(self.agent_batch)
         self.agent_batch.detach_()
         ref_trajectory = dynamics.reference_trajectory(self.agent_batch[:, -1])
-        self.state_batch = self.agent_batch[:, 0:4] - ref_trajectory
+        # self.state_batch = self.agent_batch[:, 0:4] - ref_trajectory # todo: normal
+        self.state_batch = self.agent_batch # todo:fully
         self.control = policy.forward(self.state_batch)
         self.agent_batch_next, self.f_xu, self.utility, self.F_y1, self.F_y2, _, _ = \
             dynamics.step(self.agent_batch, self.control)
@@ -58,12 +59,14 @@ class Train(GeneralConfig):
         for i in range(self.FORWARD_STEP):
             if i == 0:
                 self.x_forward[i] = self.agent_batch.detach()
-                self.u_forward[i] = policy.forward(self.x_forward[i][:, 0:4])
+                # self.u_forward[i] = policy.forward(self.x_forward[i][:, 0:4])
+                self.u_forward[i] = policy.forward(self.x_forward[i])
                 self.x_forward[i + 1], _, self.L_forward[i],_, _, _, _ = dynamics.step(self.x_forward[i], self.u_forward[i])
             else:
-                self.u_forward[i] = policy.forward(self.x_forward[i][:, 0:4])
+                # self.u_forward[i] = policy.forward(self.x_forward[i][:, 0:4])
+                self.u_forward[i] = policy.forward(self.x_forward[i])
                 self.x_forward[i + 1], _, self.L_forward[i],_, _, _, _ = dynamics.step(self.x_forward[i], self.u_forward[i])
-        self.state_batch_next = self.x_forward[-1][:, 0:4]
+        self.state_batch_next = self.x_forward[-1]
         self.value_next = value.forward(self.state_batch_next)
         self.utility = torch.zeros([self.FORWARD_STEP, self.BATCH_SIZE], dtype=torch.float32)
         for i in range(self.FORWARD_STEP):
@@ -71,10 +74,10 @@ class Train(GeneralConfig):
         self.sum_utility = torch.sum(self.utility,0)
         target_value = self.sum_utility.detach() + self.value_next.detach()
         value_now = value.forward(self.state_batch)
-        equilibrium_state = torch.tensor([[0.0, 0.0, 0.0, 0.0]])
-        value_equilibrium = value.forward(equilibrium_state)
-        value_loss = 1 / 2 * torch.mean(torch.pow((target_value - value_now), 2)) \
-                     + 10 * torch.pow(value_equilibrium, 2)
+        # equilibrium_state = torch.tensor([[0.0, 0.0, 0.0, 0.0]])
+        # value_equilibrium = value.forward(equilibrium_state)
+        value_loss = 1 / 2 * torch.mean(torch.pow((target_value - value_now), 2))
+                     # + 10 * torch.pow(value_equilibrium, 2)
         self.state_batch.requires_grad_(False)
         value.zero_grad()
         value_loss.backward()

@@ -6,7 +6,7 @@ import os
 from Network import Actor, Critic
 from Config import DynamicsConfig
 from utils import myplot
-S_DIM = 4
+S_DIM = 5
 A_DIM = 1
 
 
@@ -171,18 +171,31 @@ def adp_simulation_plot(log_dir):
     plot_length = 500
     control_history = []
     time_init = time.time()
+    # for i in range(plot_length):
+    #     u = policy.forward(state_r[:, 0:4])
+    #     state_next, deri_state, utility, F_y1, F_y2, alpha_1, alpha_2 = statemodel_plt.step(state, u)
+    #     state_r_old, _, _, _, _, _, _ = statemodel_plt.step(state_r, u)
+    #     state_r = state_r_old.detach().clone()
+    #     state_r[:, [0, 2]] = state_next[:, [0, 2]]
+    #     x_ref = statemodel_plt.reference_trajectory(state_next[:, -1])
+    #     state_r[:, 0:4] = state_r[:, 0:4] - x_ref
+    #     state = state_next.clone().detach()
+    #     s = state_next.detach().numpy()
+    #     state_history = np.append(state_history, s, axis=0)
+    #     control_history = np.append(control_history, u.detach().numpy())
+    state_r = state.clone().detach()
     for i in range(plot_length):
-        u = policy.forward(state_r[:, 0:4])
+        u = policy.forward(state_r)
         state_next, deri_state, utility, F_y1, F_y2, alpha_1, alpha_2 = statemodel_plt.step(state, u)
-        state_r_old, _, _, _, _, _, _ = statemodel_plt.step(state_r, u)
-        state_r = state_r_old.detach().clone()
-        state_r[:, [0, 2]] = state_next[:, [0, 2]]
-        x_ref = statemodel_plt.reference_trajectory(state_next[:, -1])
-        state_r[:, 0:4] = state_r[:, 0:4] - x_ref
+        state_next_r, deri_state, utility, F_y1, F_y2, alpha_1, alpha_2 = statemodel_plt.step(state_r, u)
         state = state_next.clone().detach()
+        state_r = state_next_r.clone().detach()
+        if state_r[:,4] > 2 * np.pi / config.k_curve:
+            state_r[:,4] = state_r[:,4] -  2 * np.pi / config.k_curve
         s = state_next.detach().numpy()
         state_history = np.append(state_history, s, axis=0)
         control_history = np.append(control_history, u.detach().numpy())
+
     print("ADP calculating time: {:.3f}".format(time.time() - time_init) + "s")
     trajectory = (state_history[:, -1], state_history[:, 0])
     myplot(trajectory, 1, "xy",
@@ -209,8 +222,8 @@ def adp_simulation_plot(log_dir):
            ylabel="steering angle [degree]"
            )
     comparison_dir = "Results_dir/Comparison_Data"
-    np.savetxt(os.path.join(comparison_dir, 'ADP_state.txt'), state_history)
-    np.savetxt(os.path.join(comparison_dir, 'ADP_control.txt'), control_history)
+    # np.savetxt(os.path.join(comparison_dir, 'ADP_state.txt'), state_history)
+    # np.savetxt(os.path.join(comparison_dir, 'ADP_control.txt'), control_history) #TODO: 不覆盖
     np.savetxt(os.path.join(log_dir, 'ADP_state.txt'), state_history)
     np.savetxt(os.path.join(log_dir, 'ADP_control.txt'), control_history)
 

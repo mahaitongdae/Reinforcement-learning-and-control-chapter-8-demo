@@ -1,10 +1,11 @@
 from __future__ import print_function
+import numpy as np
 
 
 class GeneralConfig(object):
     BATCH_SIZE = 256
     DYNAMICS_DIM = 5
-    STATE_DIM = 4
+    STATE_DIM = 5
     ACTION_DIM = 1
     BUFFER_SIZE = 5000
     FORWARD_STEP = 30
@@ -39,9 +40,10 @@ class DynamicsConfig(GeneralConfig):
     psi_init = a_curve * k_curve # initial position of psi
 
     # ADP reset state range
-    y_range = 5
+    y_range = 6
     psi_range = 1.7
     beta_range = 1.0
+    x_range = 2 * np.pi / k_curve
 
 
 
