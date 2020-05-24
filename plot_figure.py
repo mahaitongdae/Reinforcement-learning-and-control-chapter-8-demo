@@ -27,7 +27,7 @@ def plot_comparison(picture_dir):
         os.path.exists(os.path.join(comparison_dir, 'Open_loop_state.txt')) == 0:
         print('No comparison state data!')
     else:
-        mpc_state = np.loadtxt(os.path.join(comparison_dir, 'MPC_state.txt'))
+        mpc_state = np.loadtxt(os.path.join(comparison_dir, 'structured_MPC_state.txt'))
         open_loop_state = np.loadtxt(os.path.join(comparison_dir, 'Open_loop_state.txt'))
         adp_state = np.loadtxt(os.path.join(comparison_dir, 'ADP_state.txt'))
 
@@ -85,7 +85,7 @@ def plot_comparison(picture_dir):
               "ADP:{:.3e} | ".format(psi_avs_error[1]) +
               "Open-loop:{:.3e} | ".format(psi_avs_error[2]))
 
-        mpc_control = np.loadtxt(os.path.join(comparison_dir, 'MPC_control.txt'))
+        mpc_control = np.loadtxt(os.path.join(comparison_dir, 'structured_MPC_control.txt'))
         open_loop_control = np.loadtxt(os.path.join(comparison_dir, 'Open_loop_control.txt'))
         adp_control = np.loadtxt(os.path.join(comparison_dir, 'ADP_control.txt'))
         mpc_control_tuple = (mpc_state[1:, 4] ,180 / np.pi * mpc_control)

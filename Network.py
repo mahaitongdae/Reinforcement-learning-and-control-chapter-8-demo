@@ -12,7 +12,8 @@ class Actor(nn.Module):
 
         # parameters
         self._out_gain = PI / 9
-        self._norm_matrix = 0.1 * torch.tensor([2, 1, 10, 10], dtype=torch.float32)
+        # self._norm_matrix = 0.1 * torch.tensor([2, 1, 10, 10], dtype=torch.float32)
+        self._norm_matrix = 0.1 * torch.tensor([1, 1, 1, 1], dtype=torch.float32)
 
         # initial NNs
         self.layers = nn.Sequential(

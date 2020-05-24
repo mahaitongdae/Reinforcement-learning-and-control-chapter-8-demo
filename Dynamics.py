@@ -111,8 +111,10 @@ class VehicleDynamics(DynamicsConfig):
         delta.requires_grad_(True)
 
         # slip angle of front and rear wheels
-        alpha_1 = -delta + torch.atan(beta + self.a * omega_r / self.u)
-        alpha_2 = torch.atan(beta - self.b * omega_r / self.u)
+        # alpha_1 = -delta + torch.atan(beta + self.a * omega_r / self.u)
+        # alpha_2 = torch.atan(beta - self.b * omega_r / self.u)
+        alpha_1 = -delta + beta + self.a * omega_r / self.u
+        alpha_2 = beta - self.b * omega_r / self.u
 
         # cornering force of front and rear angle, Pacejka tire model
         F_y1 = -self.D * torch.sin(self.C * torch.atan(self.B * alpha_1)) * self.F_z1
