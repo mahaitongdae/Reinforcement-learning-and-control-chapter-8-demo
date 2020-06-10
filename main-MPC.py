@@ -47,14 +47,16 @@ state_r = state.detach().clone()
 state_r[:, 0:4] = state_r[:, 0:4] - x_ref
 state_history = state.detach().numpy()
 x = np.array([0.])
-plot_length = 500
+plot_length = 100
 control_history = []
 state_r_history = state_r
 cal_time = 0
+plt.figure()
 for i in range(plot_length):
     x = state_r.tolist()[0]
     time_start = time.time()
-    _, control = solver.mpc_solver_zero(x, config.NP)
+    temp, control = solver.mpc_solver_zero(x, config.NP)
+    plt.plot(temp[:,-1],temp[:,0])
     cal_time += time.time() - time_start
     u = np.array(control[0], dtype='float32').reshape(-1, config.ACTION_DIM)
     u = torch.from_numpy(u)
@@ -70,8 +72,9 @@ for i in range(plot_length):
     control_history = np.append(control_history, u.detach().numpy())
     state_r_history = np.append(state_history, state_r.detach().numpy())
 print("MPC calculating time: {:.3f}".format(cal_time) + "s")
-np.savetxt(os.path.join(log_dir, 'structured_MPC_state.txt'), state_history)
-np.savetxt(os.path.join(log_dir, 'structured_MPC_control.txt'), control_history)
+plt.show()
+# np.savetxt(os.path.join(log_dir, 'structured_MPC_state.txt'), state_history)
+# np.savetxt(os.path.join(log_dir, 'structured_MPC_control.txt'), control_history)
 state_r_history = state_r_history.reshape([-1,5])
 plt.figure(1)
 plt.plot(state_history[:,-1],state_history[:,0], label="trajectory")

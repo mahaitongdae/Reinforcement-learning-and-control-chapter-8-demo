@@ -1,9 +1,5 @@
-import Dynamics
 import numpy as np
-import torch
-import time
 import os
-from Network import Actor, Critic
 from Config import DynamicsConfig
 from utils import myplot
 S_DIM = 4
@@ -154,36 +150,8 @@ def adp_simulation_plot(log_dir):
         location of data and figures saved.
 
     '''
-    policy = Actor(S_DIM, A_DIM)
-    value = Critic(S_DIM, A_DIM)
-    config = DynamicsConfig()
-    load_dir = log_dir
-    policy.load_parameters(load_dir)
-    value.load_parameters(load_dir)
-    statemodel_plt = Dynamics.VehicleDynamics()
-    state = torch.tensor([[1.0, 0.0, config.psi_init, 0.0, 0.0]])
-    state.requires_grad_(False)
-    x_ref = statemodel_plt.reference_trajectory(state[:, -1])
-    state_r = state.detach().clone()
-    state_r[:, 0:4] = state_r[:, 0:4] - x_ref
-    state_history = state.detach().numpy()
-    x = np.array([0.])
-    plot_length = 500
-    control_history = []
-    time_init = time.time()
-    for i in range(plot_length):
-        u = policy.forward(state_r[:, 0:4])
-        state_next, deri_state, utility, F_y1, F_y2, alpha_1, alpha_2 = statemodel_plt.step(state, u)
-        state_r_old, _, _, _, _, _, _ = statemodel_plt.step(state_r, u)
-        state_r = state_r_old.detach().clone()
-        state_r[:, [0, 2]] = state_next[:, [0, 2]]
-        x_ref = statemodel_plt.reference_trajectory(state_next[:, -1])
-        state_r[:, 0:4] = state_r[:, 0:4] - x_ref
-        state = state_next.clone().detach()
-        s = state_next.detach().numpy()
-        state_history = np.append(state_history, s, axis=0)
-        control_history = np.append(control_history, u.detach().numpy())
-    print("ADP calculating time: {:.3f}".format(time.time() - time_init) + "s")
+    state_history = np.loadtxt(os.path.join(log_dir, 'ADP_state.txt'))
+    control_history = np.loadtxt(os.path.join(log_dir, 'ADP_control.txt'))
     trajectory = (state_history[:, -1], state_history[:, 0])
     myplot(trajectory, 1, "xy",
            fname=os.path.join(log_dir, 'trajectory.png'),
@@ -208,15 +176,10 @@ def adp_simulation_plot(log_dir):
            xlabel="longitudinal position [m]",
            ylabel="steering angle [degree]"
            )
-    comparison_dir = "Results_dir/Comparison_Data"
-    np.savetxt(os.path.join(comparison_dir, 'ADP_state.txt'), state_history)
-    np.savetxt(os.path.join(comparison_dir, 'ADP_control.txt'), control_history)
-    np.savetxt(os.path.join(log_dir, 'ADP_state.txt'), state_history)
-    np.savetxt(os.path.join(log_dir, 'ADP_control.txt'), control_history)
 
 
 if __name__ == '__main__':
     Figures_dir = './Figures/'
-    adp_simulation_plot("./Results_dir/2020-05-17-20-57-final")
+    # adp_simulation_plot("./Results_dir/2020-05-17-20-57-final")
     plot_comparison(Figures_dir)
     # plot_loss_decent("./Results_dir/2020-05-18-02-21-10000")

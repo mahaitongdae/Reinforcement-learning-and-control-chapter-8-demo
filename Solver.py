@@ -168,17 +168,30 @@ class Solver(DynamicsConfig):
         # discrete dynamic model
         self.f = vertcat(
             x[0] + self.Ts * (self.u * sin(x[2]) + x[1] * cos(x[2])),
-            x[1] + self.Ts * (-self.D * self.F_z1 * sin(
+            x[1] + self.Ts * ((-self.D * self.F_z1 * sin(
                 self.C * arctan(self.B * (-u[0] + (x[1] + self.a * x[3]) / self.u))) * cos(u[0])
                               - self.D * self.F_z2 * sin(
-                        self.C * arctan(self.B * ((x[1] - self.b * x[3]) / self.u))) / self.m - self.u * x[3]),
+                        self.C * arctan(self.B * ((x[1] - self.b * x[3]) / self.u)))) / self.m - self.u * x[3]),
             x[2] + self.Ts * (x[3]),
-            x[3] + self.Ts * (self.a * (-self.D * self.F_z1 * sin(
+            x[3] + self.Ts * ((self.a * (-self.D * self.F_z1 * sin(
                 self.C * arctan(self.B * (-u[0] + (x[1] + self.a * x[3]) / self.u)))) * cos(u[0])
                               - self.b * (-self.D * self.F_z2 * sin(
-                        self.C * arctan(self.B * ((x[1] - self.b * x[3]) / self.u)))) / self.I_zz),
+                        self.C * arctan(self.B * ((x[1] - self.b * x[3]) / self.u))))) / self.I_zz),
             x[4] + self.Ts * (self.u * cos(x[2]) - x[1] * sin(x[2]))
         )
+        # F_y1 = self.k1*(-u[0] + (x[1] + self.a * x[3]) / self.u)
+        # F_y2 = self.k2*((x[1] - self.b * x[3]) / self.u)
+        # self.f = vertcat(
+        #     x[0] + self.Ts * (self.u * sin(x[2]) + x[1] * cos(x[2])),
+        #     x[1] + self.Ts * ((self.k1*(-u[0] + (x[1] + self.a * x[3]) / self.u) * cos(u[0]) +
+        #                       self.k2*((x[1] - self.b * x[3]) / self.u)) / self.m - self.u * x[3]),
+        #     x[2] + self.Ts * (x[3]),
+        #     x[3] + self.Ts * (self.a * (-self.D * self.F_z1 * sin(
+        #         self.C * arctan(self.B * (-u[0] + (x[1] + self.a * x[3]) / self.u)))) * cos(u[0])
+        #                       - self.b * (-self.D * self.F_z2 * sin(
+        #                 self.C * arctan(self.B * ((x[1] - self.b * x[3]) / self.u)))) / self.I_zz),
+        #     x[4] + self.Ts * (self.u * cos(x[2]) - x[1] * sin(x[2]))
+        # )
 
         # Create solver instance
         self.F = Function("F", [x, u], [self.f])
@@ -222,9 +235,9 @@ class Solver(DynamicsConfig):
 
 
             # Cost function
-            F_cost = Function('F_cost', [x, u], [100 * (x[0]) ** 2
+            F_cost = Function('F_cost', [x, u], [1 * (x[0]) ** 2
                                                  + 1 * (x[2]) ** 2
-                                                 + 10 * u[0] ** 2])
+                                                 + 0 * u[0] ** 2])
             J += F_cost(w[k * 2], w[k * 2 - 1])
 
         # Create NLP solver
