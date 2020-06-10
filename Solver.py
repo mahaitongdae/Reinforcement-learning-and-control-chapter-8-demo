@@ -222,9 +222,9 @@ class Solver(DynamicsConfig):
 
 
             # Cost function
-            F_cost = Function('F_cost', [x, u], [1 * (x[0]) ** 2
+            F_cost = Function('F_cost', [x, u], [100 * (x[0]) ** 2
                                                  + 1 * (x[2]) ** 2
-                                                 + 0.0 * u[0] ** 2])
+                                                 + 10 * u[0] ** 2])
             J += F_cost(w[k * 2], w[k * 2 - 1])
 
         # Create NLP solver

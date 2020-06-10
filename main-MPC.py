@@ -40,7 +40,7 @@ solver=Solver()
 # # np.savetxt(os.path.join(log_dir, 'structured_MPC_control.txt'), control_history)
 
 statemodel_plt = Dynamics.VehicleDynamics()
-state = torch.tensor([[0.0, 0.0, config.psi_init, 0.0, 0.0]])
+state = torch.tensor([[1.0, 0.0, config.psi_init, 0.0, 0.0]])
 state.requires_grad_(False)
 x_ref = statemodel_plt.reference_trajectory(state[:, -1])
 state_r = state.detach().clone()
@@ -49,6 +49,7 @@ state_history = state.detach().numpy()
 x = np.array([0.])
 plot_length = 500
 control_history = []
+state_r_history = state_r
 cal_time = 0
 for i in range(plot_length):
     x = state_r.tolist()[0]
@@ -67,10 +68,17 @@ for i in range(plot_length):
     s = state_next.detach().numpy()
     state_history = np.append(state_history, s, axis=0)
     control_history = np.append(control_history, u.detach().numpy())
+    state_r_history = np.append(state_history, state_r.detach().numpy())
 print("MPC calculating time: {:.3f}".format(cal_time) + "s")
 np.savetxt(os.path.join(log_dir, 'structured_MPC_state.txt'), state_history)
 np.savetxt(os.path.join(log_dir, 'structured_MPC_control.txt'), control_history)
-plt.figure()
-plt.plot(state_history[:,-1],state_history[:,0])
-plt.plot(state_history[:,-1],config.a_curve * np.sin(config.k_curve*state_history[:,-1]))
+state_r_history = state_r_history.reshape([-1,5])
+plt.figure(1)
+plt.plot(state_history[:,-1],state_history[:,0], label="trajectory")
+plt.plot(state_r_history[:,-1],state_r_history[:,0], label="$trajectory_r$")
+plt.plot(state_history[:,-1],config.a_curve * np.sin(config.k_curve*state_history[:,-1]), label="reference")
+plt.legend(loc="upper right")
+plt.show()
+plt.figure(2)
+plt.plot(state_history[0:-1,-1], control_history)
 plt.show()

@@ -161,7 +161,7 @@ def adp_simulation_plot(log_dir):
     policy.load_parameters(load_dir)
     value.load_parameters(load_dir)
     statemodel_plt = Dynamics.VehicleDynamics()
-    state = torch.tensor([[0.0, 0.0, config.psi_init, 0.0, 0.0]])
+    state = torch.tensor([[1.0, 0.0, config.psi_init, 0.0, 0.0]])
     state.requires_grad_(False)
     x_ref = statemodel_plt.reference_trajectory(state[:, -1])
     state_r = state.detach().clone()

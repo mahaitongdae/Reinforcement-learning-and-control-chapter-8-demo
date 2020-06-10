@@ -37,8 +37,8 @@ class DynamicsConfig(GeneralConfig):
     F_z1 = m * g * b / L    # Vertical force on front axle
     F_z2 = m * g * a / L    # Vertical force on rear axle
 
-    k_curve = 1/30          # curve shape of a * sin(kx)
-    a_curve = 1           # curve shape of a * sin(kx)
+    k_curve = 0          # curve shape of a * sin(kx)
+    a_curve = 0           # curve shape of a * sin(kx)
     psi_init = a_curve * k_curve # initial position of psi
 
     # ADP reset state range
