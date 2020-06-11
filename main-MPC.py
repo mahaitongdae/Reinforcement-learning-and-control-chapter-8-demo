@@ -55,7 +55,7 @@ plt.figure()
 for i in range(plot_length):
     x = state_r.tolist()[0]
     time_start = time.time()
-    temp, control = solver.mpc_solver_zero(x, config.NP)
+    temp, control = solver.mpcSolver(x, config.NP)
     plt.plot(temp[:,-1],temp[:,0])
     cal_time += time.time() - time_start
     u = np.array(control[0], dtype='float32').reshape(-1, config.ACTION_DIM)

@@ -85,7 +85,7 @@ def plot_comparison(picture_dir):
         open_loop_control = np.loadtxt(os.path.join(comparison_dir, 'Open_loop_control.txt'))
         adp_control = np.loadtxt(os.path.join(comparison_dir, 'ADP_control.txt'))
         mpc_control_tuple = (mpc_state[1:, 4] ,180 / np.pi * mpc_control)
-        open_loop_control_tuple = (open_loop_state[:, 4], 180 / np.pi * open_loop_control)
+        open_loop_control_tuple = (open_loop_state[1:, 4], 180 / np.pi * open_loop_control)
         adp_control_tuple = (adp_state[1:, 4], 180 / np.pi * adp_control)
         control_plot_data = [mpc_control_tuple, adp_control_tuple, open_loop_control_tuple]
         myplot(control_plot_data, 3, "xy",
@@ -180,6 +180,6 @@ def adp_simulation_plot(log_dir):
 
 if __name__ == '__main__':
     Figures_dir = './Figures/'
-    # adp_simulation_plot("./Results_dir/2020-05-17-20-57-final")
+    # adp_simulation_plot("./Results_dir/2020-06-10-19-15-5000")
     plot_comparison(Figures_dir)
     # plot_loss_decent("./Results_dir/2020-05-18-02-21-10000")

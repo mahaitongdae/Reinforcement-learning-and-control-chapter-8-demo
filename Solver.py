@@ -43,7 +43,7 @@ class Solver(DynamicsConfig):
 
         return x1
 
-    def mpc_solver(self, x_init, predict_steps):
+    def openLoopMpcSolver(self, x_init, predict_steps):
         """
         Solver of nonlinear MPC
 
@@ -67,15 +67,15 @@ class Solver(DynamicsConfig):
         # discrete dynamic model
         self.f = vertcat(
             x[0] + self.Ts * (self.u * sin(x[2]) + x[1] * cos(x[2])),
-            x[1] + self.Ts * (-self.D * self.F_z1 * sin(
+            x[1] + self.Ts * ((-self.D * self.F_z1 * sin(
                 self.C * arctan(self.B * (-u[0] + (x[1] + self.a * x[3]) / self.u))) * cos(u[0])
-                              - self.D * self.F_z2 * sin(
-                        self.C * arctan(self.B * ((x[1] - self.b * x[3]) / self.u))) / self.m - self.u * x[3]),
+                               - self.D * self.F_z2 * sin(
+                        self.C * arctan(self.B * ((x[1] - self.b * x[3]) / self.u)))) / self.m - self.u * x[3]),
             x[2] + self.Ts * (x[3]),
-            x[3] + self.Ts * (self.a * (-self.D * self.F_z1 * sin(
+            x[3] + self.Ts * ((self.a * (-self.D * self.F_z1 * sin(
                 self.C * arctan(self.B * (-u[0] + (x[1] + self.a * x[3]) / self.u)))) * cos(u[0])
-                              - self.b * (-self.D * self.F_z2 * sin(
-                        self.C * arctan(self.B * ((x[1] - self.b * x[3]) / self.u)))) / self.I_zz),
+                               - self.b * (-self.D * self.F_z2 * sin(
+                        self.C * arctan(self.B * ((x[1] - self.b * x[3]) / self.u))))) / self.I_zz),
             x[4] + self.Ts * (self.u * cos(x[2]) - x[1] * sin(x[2]))
         )
 
@@ -144,7 +144,7 @@ class Solver(DynamicsConfig):
             control[i] = state_all[nt * i + nt - 1]
         return state, control
 
-    def mpc_solver_zero(self, x_init, predict_steps):
+    def mpcSolver(self, x_init, predict_steps):
         """
         Solver of nonlinear MPC
 

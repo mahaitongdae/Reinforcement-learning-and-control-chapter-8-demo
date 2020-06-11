@@ -16,16 +16,17 @@ import os
 from Network import Actor, Critic
 from Train import Train
 from datetime import datetime
+from Simulation import simulation
 from plot_figure import adp_simulation_plot, plot_comparison
 
 
 # Parameters
-MAX_ITERATION = 500         # max iterations
-LR_P = 8e-4                 # learning rate of policy net
-LR_V = 1e-3                 # learning rate of value net
+MAX_ITERATION = 10         # max iterations
+LR_P = 3e-5                 # learning rate of policy net
+LR_V = 8e-4                 # learning rate of value net
 S_DIM = 4                   # state dimension
 A_DIM = 1                   # action dimension
-TRAIN_FLAG = 1
+TRAIN_FLAG = 0
 LOAD_PARA_FLAG = 1
 
 # Set random seed
@@ -43,14 +44,19 @@ iteration_index = 0
 
 if LOAD_PARA_FLAG == 1:
     # load pre-trained parameters
-    load_dir = "./Results_dir/2020-05-20-14-06-500"
+    load_dir = "./Results_dir/2020-06-11-13-24-10"
     policy.load_parameters(load_dir)
     value.load_parameters(load_dir)
 
 if TRAIN_FLAG == 1:
     # train the network by policy iteration
     train = Train()
-    train.agent_batch = vehicleDynamics.initialize_state()
+    # train.agent_batch = vehicleDynamics.initialize_state()
+    if LOAD_PARA_FLAG == 1:
+        train.agent_batch = torch.load(os.path.join(load_dir,'agent_buffer.pth'))
+    else:
+        train.agent_batch = vehicleDynamics.initialize_state()
+
     while True:
         train.update_state(policy, vehicleDynamics)
         value_loss = train.policy_evaluation(policy, value, vehicleDynamics)
@@ -59,12 +65,12 @@ if TRAIN_FLAG == 1:
 
         # print train information
         if iteration_index % 1 == 0:
-            log_trace = "iteration:{:3d} |"\
-                        "policy_loss:{:3.3f} |" \
+            log_trace = "iteration:{:3d} | "\
+                        "policy_loss:{:3.3f} | " \
                         "value_loss:{:3.3f}".format(iteration_index, float(policy_loss), float(value_loss))
             print(log_trace)
 
-        # save parameters and plot figures
+        # save parameters, run simulation and plot figures
         if iteration_index == MAX_ITERATION:
             # ==================== Set log path ====================
             log_dir = "./Results_dir/" + datetime.now().strftime("%Y-%m-%d-%H-%M-" + str(iteration_index))
@@ -73,10 +79,14 @@ if TRAIN_FLAG == 1:
             policy.save_parameters(log_dir)
             train.print_loss_figure(MAX_ITERATION, log_dir)
             train.save_data(log_dir)
+            simulation(log_dir)
             adp_simulation_plot(log_dir)
-            # plot_comparison("./Figures")
+            plot_comparison("./Figures")
             break
-
+else:
+    simulation(load_dir)
+    adp_simulation_plot(load_dir)
+    plot_comparison("./Figures")
 
 
 

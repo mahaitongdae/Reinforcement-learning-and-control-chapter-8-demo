@@ -20,7 +20,7 @@ log_dir = "Results_dir/Comparison_Data"
 config = DynamicsConfig()
 x_init = [0.0, 0.0, config.psi_init, 0.0, 0.0]
 solver=Solver()
-state, control = solver.mpc_solver(x_init, config.NP_TOTAL)
+state, control = solver.openLoopMpcSolver(x_init, config.NP_TOTAL)
 np.savetxt(os.path.join(log_dir, 'Open_loop_state.txt'), state)
 np.savetxt(os.path.join(log_dir, 'Open_loop_control.txt'), control)
 plt.figure()
